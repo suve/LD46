@@ -32,7 +32,7 @@
 	var img_chara_stand, img_chara_walk;
 	var img_terrain;
 
-	var chara_position = 1.5;
+	var player;
 
 	let getTicks = function() {
 		var d = new Date();
@@ -76,18 +76,24 @@
 		let terrain = [0, 1, 0, 3, 2, 5, 2, 1, 0, 3, 0, 1, 0, 3, 2, 5, 2, 1, 0, 3];
 		for(let i = 0; i < terrain.length; ++i) {
 			let t = terrain[i];
-			ctx.drawImage(img_terrain, (t % 2) * 550, Math.floor(t / 2) * 550, 550, 550, 400 * (i - chara_position), (resolution - 400) / 2, 400, 400);
+			ctx.drawImage(img_terrain, (t % 2) * 550, Math.floor(t / 2) * 550, 550, 550, 400 * (i - Player.x), (resolution - 400) / 2, 400, 400);
 		}
 
 		let chara_img = (Input.keyState[ARROW_LEFT] || Input.keyState[ARROW_RIGHT]) ? img_chara_walk : img_chara_stand;
 
 		let frame = Math.floor(getTicks() / 250) % 4;
-		ctx.drawImage(chara_img, 0, frame * 550, 550, 550, (resolution - 400) / 2, (resolution - 400) / 2, 400, 400);
+		ctx.drawImage(chara_img, Player.facing * 550, frame * 550, 550, 550, (resolution - 400) / 2, (resolution - 400) / 2, 400, 400);
 	};
 
 	let gameLogic = function() {
-		if(Input.keyState[ARROW_LEFT]) chara_position -= CYCLE_SECONDS * 0.5;
-		if(Input.keyState[ARROW_RIGHT]) chara_position += CYCLE_SECONDS * 0.5;
+		let direction = 0;
+		if(Input.keyState[ARROW_LEFT]) direction -= 1;
+		if(Input.keyState[ARROW_RIGHT]) direction += 1;
+
+		if(direction != 0) {
+			Player.x += direction * CYCLE_SECONDS * Player.speed;
+			Player.facing = (direction > 0) ? FACING_RIGHT : FACING_LEFT;
+		}
 	};
 
 	let mainLoop = function() {
@@ -147,6 +153,7 @@
 
 		Assets = new __assets();
 		Input = new __input();
+		Player = new __player();
 
 		canvas = document.createElement("canvas");
 		canvas.id = "LD46-canvas";
