@@ -18,10 +18,55 @@
 const FACING_LEFT = 1;
 const FACING_RIGHT = 0;
 
+const ANIM_IDLE = 0;
+const ANIM_WALK = 1;
+const ANIM_JUMP = 2;
+const ANIM_MIDAIR = 3;
+
 function __player() {
-	this.x = 0;
-	this.y = 0;
+	let self = this;
+
+	this.position = {"x": 0, "y": 0};
+	this.velocity = {"x": 0, "y": 0};
 	this.facing = FACING_RIGHT;
 
+	this.animation = ANIM_IDLE;
+	this.animationCycles = 0;
+
 	this.speed = 0.5;
+	this.jumpSpeed = 1.65;
+	this.jumpPower = 3.0;
+
+
+	this.changeAnimation = function(newAnim) {
+		if(self.animation === newAnim) return;
+
+		self.animation = newAnim;
+		self.animationCycles = 0;
+	}
+
+	this.processInput = function(input) {
+		if(self.animation > ANIM_WALK) {
+			return;
+		}
+
+		if(input.keyState[ARROW_UP]) {
+			self.velocity = {"x": 0, "y": 0};
+			self.changeAnimation(ANIM_JUMP);
+			return;
+		}
+
+		let direction = 0;
+		if(input.keyState[ARROW_LEFT]) direction -= 1;
+		if(input.keyState[ARROW_RIGHT]) direction += 1;
+
+		if(direction != 0) {
+			self.velocity.x = direction * self.speed;
+			self.facing = (direction > 0) ? FACING_RIGHT : FACING_LEFT;
+			self.changeAnimation(ANIM_WALK);
+		} else {
+			self.velocity.x = 0;
+			self.changeAnimation(ANIM_IDLE);
+		}
+	};
 }

@@ -20,19 +20,20 @@
 	const CYCLE_SECONDS = 1 / CYCLES_PER_SECOND;
 	const CYCLE_TICKS = Math.floor(1000 / CYCLES_PER_SECOND);
 
+	const ANIMATION_CYCLES = Math.floor(CYCLES_PER_SECOND / 4);
+	const GRAVITY = 7.0;
+
 	const resolution = 1600;
 
-	var Assets, Input;
+	var Assets, Input, Player;
 
 	var appstart;
 	var canvas, ctx;
 	var mainLoopTicks;
 	var outline;
 
-	var img_chara_stand, img_chara_walk;
+	var img_chara = [];
 	var img_terrain;
-
-	var player;
 
 	let getTicks = function() {
 		var d = new Date();
@@ -92,23 +93,44 @@
 		let terrain = [0, 1, 0, 3, 2, 5, 2, 1, 0, 3, 0, 1, 0, 3, 2, 5, 2, 1, 0, 3];
 		for(let i = 0; i < terrain.length; ++i) {
 			let t = terrain[i];
-			ctx.drawImage(img_terrain, (t % 2) * 550, Math.floor(t / 2) * 550, 550, 550, 400 * (i - Player.x), (resolution - 400) / 2, 400, 400);
+			ctx.drawImage(img_terrain, (t % 2) * 550, Math.floor(t / 2) * 550, 550, 550, 400 * (i - Player.position.x), (resolution - 400) / 2, 400, 400);
 		}
 
-		let chara_img = (Input.keyState[ARROW_LEFT] || Input.keyState[ARROW_RIGHT]) ? img_chara_walk : img_chara_stand;
-
-		let frame = Math.floor(getTicks() / 250) % 4;
-		ctx.drawImage(chara_img, Player.facing * 550, frame * 550, 550, 550, (resolution - 400) / 2, (resolution - 400) / 2, 400, 400);
+		let frame = Math.floor(Player.animationCycles / ANIMATION_CYCLES);
+		ctx.drawImage(
+			img_chara[Player.animation],
+			Player.facing * 550, frame * 550, 550, 550,
+			(resolution - 400) / 2, (resolution - 400) / 2 + (Player.position.y * 400), 400, 400
+		);
 	};
 
 	let gameLogic = function() {
-		let direction = 0;
-		if(Input.keyState[ARROW_LEFT]) direction -= 1;
-		if(Input.keyState[ARROW_RIGHT]) direction += 1;
+		Player.processInput(Input);
 
-		if(direction != 0) {
-			Player.x += direction * CYCLE_SECONDS * Player.speed;
-			Player.facing = (direction > 0) ? FACING_RIGHT : FACING_LEFT;
+		Player.animationCycles += 1;
+
+		if(Player.animation === ANIM_JUMP) {
+			if(Player.animationCycles === 3 * ANIMATION_CYCLES) {
+				Player.velocity.x = ((Player.facing === FACING_RIGHT) ? +1 : -1) * Player.jumpSpeed;
+				Player.velocity.y -= Player.jumpPower;
+			} else if(Player.animationCycles === 4 * ANIMATION_CYCLES) {
+				Player.changeAnimation(ANIM_MIDAIR);
+			}
+		} else {
+			if(Player.animationCycles === 4 * ANIMATION_CYCLES) Player.animationCycles = 0;
+		}
+
+		Player.position.x += CYCLE_SECONDS * Player.velocity.x;
+
+		if(Player.velocity.y != 0) {
+			Player.velocity.y += CYCLE_SECONDS * GRAVITY;
+			Player.position.y += CYCLE_SECONDS * Player.velocity.y;
+
+			if(Player.position.y >= 0) {
+				Player.position.y = 0;
+				Player.velocity.y = 0;
+				Player.changeAnimation(ANIM_IDLE);
+			}
 		}
 	};
 
@@ -206,8 +228,11 @@
 
 		outline = Assets.addGfx("border-3600.png");
 		img_terrain = Assets.addGfx("terrain-550.png");
-		img_chara_walk = Assets.addGfx("character0-550.png");
-		img_chara_stand = Assets.addGfx("character1-550.png");
+
+		img_chara[ANIM_IDLE] = Assets.addGfx("character-idle-550.png");
+		img_chara[ANIM_WALK] = Assets.addGfx("character-walk-550.png");
+		img_chara[ANIM_JUMP] = Assets.addGfx("character-jump-550.png");
+		img_chara[ANIM_MIDAIR] = Assets.addGfx("character-midair-550.png");
 
 		window.addEventListener('resize', resize);
 		resize();
