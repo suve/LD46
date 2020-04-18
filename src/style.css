@@ -15,7 +15,7 @@
  * along with this program (LICENCE-AGPL-v3.txt).
  * If not, see <https://www.gnu.org/licenses/>.
  */
-body { 
+body {
 	padding: 0;
 	margin: 0;
 	background-color: black;
@@ -30,7 +30,7 @@ audio, img {
 	display: none;
 }
 
-#LD46-canvas {
+canvas#LD46-canvas {
 	display: block;
 	image-rendering: crisp-edges;
 	image-rendering: -moz-crisp-edges;
@@ -38,7 +38,7 @@ audio, img {
 	position: absolute;
 }
 
-#LD46-outline {
+img#LD46-outline {
 	position: absolute;
 	z-index: 10;
 	display: block;

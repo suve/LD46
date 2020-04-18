@@ -16,32 +16,50 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 (function(){
+	const resolution = 1600;
+
+	var canvas, ctx;
+	var outline;
+
+	let fillRect = function(x, y, w, h, colour) {
+		if(colour !== null) ctx.fillStyle = colour;
+
+		x = Math.floor(x);
+		y = Math.floor(y);
+
+		w = (w !== null) ? Math.floor(w) : resolution;
+		h = (h !== null) ? Math.floor(h) : resolution;
+
+		ctx.fillRect(x, y, w, h);
+	}
+
+	let resize = function() {
+		let width = window.innerWidth;
+		let height = window.innerHeight;
+
+		let size = (width < height) ? width : height;
+		let cssSize = size + "px";
+
+		let cssTop = ((height - size) / 2) + "px";
+		let cssLeft = ((width - size) / 2) + "px";
+
+		let resizeElem = function(elem) {
+			elem.style["top"] = cssTop;
+			elem.style["left"] = cssLeft;
+			elem.style["width"] = canvas.style["height"] = cssSize;
+		};
+		resizeElem(canvas);
+		resizeElem(outline);
+	};
+
 	let init = function(){
-		let canvas, outline;
-		function resize() {
-			const aspectRatio = 1.0;
-
-			let width = window.innerWidth;
-			let height = window.innerHeight;
-
-			let size = (width < height) ? width : height;
-			let cssSize = size + "px";
-
-			let cssTop = ((height - size) / 2) + "px";
-			let cssLeft = ((width - size) / 2) + "px";
-
-			let resizeElem = function(elem) {
-				elem.style["top"] = cssTop;
-				elem.style["left"] = cssLeft;
-				elem.style["width"] = canvas.style["height"] = cssSize;
-			};
-			resizeElem(canvas);
-			resizeElem(outline);
-		}
-
-		canvas = document.createElement("div");
+		canvas = document.createElement("canvas");
 		canvas.id = "LD46-canvas";
-		canvas.style["background-color"] = "white";
+		canvas.width = canvas.height = resolution;
+
+		ctx = canvas.getContext("2d", { "alpha": true });
+		ctx.save();
+		fillRect(0, 0, null, null, "white");
 
 		outline = document.createElement("img");
 		outline.id = "LD46-outline";
@@ -52,7 +70,7 @@
 
 		document.body.appendChild(canvas);
 		document.body.appendChild(outline);
-	}
+	};
 
 	window.addEventListener('load', function(){
 		init();
