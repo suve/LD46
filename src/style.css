@@ -26,14 +26,20 @@ canvas {
 	display: none;
 }
 
-canvas#ld46 {
+audio, img {
+	display: none;
+}
+
+#LD46-canvas {
 	display: block;
 	image-rendering: crisp-edges;
 	image-rendering: -moz-crisp-edges;
 	image-rendering: pixelated;
-	margin: 0 auto;
+	position: absolute;
 }
 
-audio, img {
-	display: none;
+#LD46-outline {
+	position: absolute;
+	z-index: 10;
+	display: block;
 }

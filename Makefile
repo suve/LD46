@@ -16,14 +16,19 @@
 
 BROWSER ?= firefox
 
+PNG_SOURCES := $(shell ls gfx/*.png)
+PNG_TARGETS := $(PNG_SOURCES:gfx/%.png=build/%.png)
+
 JS_SOURCES := $(shell ls src/*.js)
 
 # -- variables end
 # -- .PHONY start
 
-.PHONY = all clean run
+.PHONY = all assets clean run
 
-all: build/index.html build/code.js build/style.css
+all: assets build/index.html build/code.js build/style.css
+
+assets: $(PNG_TARGETS)
 
 run: all
 	$(BROWSER) build/index.html
@@ -45,3 +50,7 @@ build/style.css: src/style.css
 build/code.js: $(JS_SOURCES)
 	mkdir -p build/
 	cat /dev/null $^ | python3 -mrjsmin > "$@"
+
+build/%.png: gfx/%.png
+	mkdir -p build/
+	optipng -out "$@" -quiet -clobber "$<"
