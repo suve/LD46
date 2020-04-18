@@ -88,5 +88,3 @@ function __assets() {
 		return null;
 	}
 }
-
-var Assets = new __assets();
