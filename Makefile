@@ -49,7 +49,7 @@ build/style.css: src/style.css
 
 build/code.js: $(JS_SOURCES)
 	mkdir -p build/
-	cat /dev/null $^ | python3 -mrjsmin > "$@"
+	cat $^ | python3 -mrjsmin > "$@"
 
 build/%.png: gfx/%.png
 	mkdir -p build/
