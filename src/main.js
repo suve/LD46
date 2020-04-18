@@ -25,7 +25,9 @@
 	var canvas, ctx;
 	var mainLoopTicks;
 	var outline;
-	var zing, zzing;
+
+	var img_chara;
+	var img_terrain;
 
 	let getTicks = function() {
 		var d = new Date();
@@ -71,11 +73,11 @@
 		let terrain = [0, 1, 0, 3, 2, 5, 2, 1, 0, 3, 0, 1, 0, 3, 2, 5, 2, 1, 0, 3];
 		for(let i = 0; i < terrain.length; ++i) {
 			let t = terrain[i];
-			ctx.drawImage(zzing, (t % 2) * 550, Math.floor(t / 2) * 550, 550, 550, i * 400 - offset, (resolution - 400) / 2, 400, 400);
+			ctx.drawImage(img_terrain, (t % 2) * 550, Math.floor(t / 2) * 550, 550, 550, i * 400 - offset, (resolution - 400) / 2, 400, 400);
 		}
 
 		let frame = Math.floor(getTicks() / 250) % 4;
-		ctx.drawImage(zing, 0, frame * 550, 550, 550, (resolution - 400) / 2, (resolution - 400) / 2, 400, 400);
+		ctx.drawImage(img_chara, 0, frame * 550, 550, 550, (resolution - 400) / 2, (resolution - 400) / 2, 400, 400);
 	};
 
 	let gameLogic = function() {
@@ -96,36 +98,63 @@
 		window.setTimeout(mainLoop, CYCLE_TICKS - (ticks % CYCLE_TICKS));
 	};
 
+	let loadingLoop = function() {
+		if(Assets.loadingFinished()) {
+			outline.id = "LD46-outline";
+
+			mainLoopTicks = getTicks();
+			mainLoop();
+			return;
+		}
+
+		fillRect(0, 0, null, null, "white");
+
+		let eight = Math.floor(getTicks() / 100) % 8;
+		for(let i = 1; i < 3; ++i) {
+			let p = (eight + i) % 8;
+
+			let colour = i * 64;
+			colour = "rgb(" + colour + "," + colour + "," + colour + ")";
+
+			let x = ((p == 0) || (p == 6) || (p == 7)) ? 0 : ((p == 2) || (p == 3) || (p == 4)) ? 2 : 1;
+			let y = ((p == 0) || (p == 1) || (p == 2)) ? 0 : ((p == 4) || (p == 5) || (p == 6)) ? 2 : 1;
+
+			let inner = 80;
+			let padding = 10;
+			let outer = (inner + 2 * padding);
+
+			let basePos = Math.floor((resolution - 3 * (inner + padding)) / 2);
+			fillRect(
+				basePos + (x * outer) + padding,
+				basePos + (y * outer) + padding,
+				inner,
+				inner,
+				colour
+			);
+		}
+
+		window.setTimeout(loadingLoop, CYCLE_TICKS);
+	};
+
 	let init = function(){
 		appstart = (new Date()).getTime();
 
 		canvas = document.createElement("canvas");
 		canvas.id = "LD46-canvas";
 		canvas.width = canvas.height = resolution;
+		document.body.appendChild(canvas);
 
 		ctx = canvas.getContext("2d", { "alpha": true });
 		ctx.save();
-		fillRect(0, 0, null, null, "white");
 
-		outline = document.createElement("img");
-		outline.id = "LD46-outline";
-		outline.src = "border-3600.png";
-
-		zing = document.createElement("img");
-		zing.src = "character-550.png";
-
-		zzing = document.createElement("img");
-		zzing.src = "terrain-550.png";
-
-		document.body.appendChild(canvas);
-		document.body.appendChild(outline);
-		document.body.appendChild(zing);
+		outline = Assets.addGfx("border-3600.png");
+		img_chara = Assets.addGfx("character-550.png");
+		img_terrain = Assets.addGfx("terrain-550.png");
 
 		window.addEventListener('resize', resize);
 		resize();
 
-		mainLoopTicks = getTicks();
-		mainLoop();
+		loadingLoop();
 	};
 
 	let errorHandler = function(message, source, lineno, colno, error) {
