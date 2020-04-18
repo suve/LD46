@@ -109,27 +109,42 @@
 
 		Player.animationCycles += 1;
 
+		let frame;
+		if(Player.animationCycles % ANIMATION_CYCLES == 0) {
+			frame = Math.floor(Player.animationCycles / ANIMATION_CYCLES);
+		} else {
+			frame = null;
+		}
+
 		if(Player.animation === ANIM_JUMP) {
-			if(Player.animationCycles === 3 * ANIMATION_CYCLES) {
+			if(frame === 3) {
 				Player.velocity.x = ((Player.facing === FACING_RIGHT) ? +1 : -1) * Player.jumpSpeed;
 				Player.velocity.y -= Player.jumpPower;
-			} else if(Player.animationCycles === 4 * ANIMATION_CYCLES) {
-				Player.changeAnimation(ANIM_MIDAIR);
+				Player.changeAnimation(ANIM_FLYI);
+			}
+		} else if(Player.animation === ANIM_LAND) {
+			if(frame === 3) {
+				Player.changeAnimation(ANIM_IDLE);
 			}
 		} else {
-			if(Player.animationCycles === 4 * ANIMATION_CYCLES) Player.animationCycles = 0;
+			if(frame === 4) Player.animationCycles = 0;
 		}
 
 		Player.position.x += CYCLE_SECONDS * Player.velocity.x;
 
 		if(Player.velocity.y != 0) {
 			Player.velocity.y += CYCLE_SECONDS * GRAVITY;
+			if(Player.velocity.y > 0) Player.changeAnimation(ANIM_FALL);
+
 			Player.position.y += CYCLE_SECONDS * Player.velocity.y;
 
 			if(Player.position.y >= 0) {
 				Player.position.y = 0;
+
+				Player.velocity.x = 0;
 				Player.velocity.y = 0;
-				Player.changeAnimation(ANIM_IDLE);
+
+				Player.changeAnimation(ANIM_LAND);
 			}
 		}
 	};
@@ -232,7 +247,9 @@
 		img_chara[ANIM_IDLE] = Assets.addGfx("character-idle-550.png");
 		img_chara[ANIM_WALK] = Assets.addGfx("character-walk-550.png");
 		img_chara[ANIM_JUMP] = Assets.addGfx("character-jump-550.png");
-		img_chara[ANIM_MIDAIR] = Assets.addGfx("character-midair-550.png");
+		img_chara[ANIM_FLYI] = Assets.addGfx("character-flyi-550.png");
+		img_chara[ANIM_FALL] = Assets.addGfx("character-fall-550.png");
+		img_chara[ANIM_LAND] = Assets.addGfx("character-land-550.png");
 
 		window.addEventListener('resize', resize);
 		resize();

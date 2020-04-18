@@ -21,7 +21,9 @@ const FACING_RIGHT = 0;
 const ANIM_IDLE = 0;
 const ANIM_WALK = 1;
 const ANIM_JUMP = 2;
-const ANIM_MIDAIR = 3;
+const ANIM_FLYI = 3;
+const ANIM_FALL = 4;
+const ANIM_LAND = 5;
 
 function __player() {
 	let self = this;
