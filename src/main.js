@@ -51,6 +51,22 @@
 		ctx.fillRect(x, y, w, h);
 	};
 
+	let colourGrey = function(value) {
+		return colourRGB(value, value, value);
+	};
+
+	let colourGreyAlpha = function(value, alpha) {
+		return colourRGBA(value, value, value, alpha);
+	};
+
+	let colourRGB = function(r, g, b) {
+		return "rgb(" + Math.floor(r) + "," + Math.floor(g) + "," + Math.floor(b) + ")";
+	};
+
+	let colourRGBA = function(r, g, b, a) {
+		return "rgba(" + Math.floor(r) + "," + Math.floor(g) + "," + Math.floor(b) + "," + (a / 255) + ")";
+	};
+
 	let resize = function() {
 		let width = window.innerWidth;
 		let height = window.innerHeight;
@@ -121,12 +137,37 @@
 
 		fillRect(0, 0, null, null, "white");
 
-		let eight = Math.floor(getTicks() / 100) % 8;
-		for(let i = 1; i < 3; ++i) {
-			let p = (eight + i) % 8;
+		let fontSize = 48;
+		ctx.font = fontSize + "px monospace";
+		ctx.textAlign = 'start';
+		ctx.textBaseline = 'top';
 
-			let colour = i * 64;
-			colour = "rgb(" + colour + "," + colour + "," + colour + ")";
+		let list = Assets.getList();
+		for(let i = 0; i < list.length; ++i) {
+			let y = 8 + (i * fontSize);
+
+			switch(list[i].ready) {
+				case ASSET_LOADING:
+					ctx.fillStyle = "black";
+					ctx.fillText("[WAIT]", 8, y);
+				break;
+				case ASSET_READY:
+					ctx.fillStyle = "green";
+					ctx.fillText("[ OK ]", 8, y);
+				break;
+				case ASSET_ERROR:
+					ctx.fillStyle = "red";
+					ctx.fillText("[FAIL]", 8, y);
+				break;
+			}
+
+			ctx.fillStyle = "black";
+			ctx.fillText(list[i].path.toString(), 8 + (4 * fontSize), y);
+		}
+
+		let eight = Math.floor(getTicks() / 100) % 8;
+		for(let i = 1; i <= 3; ++i) {
+			let p = (eight + i) % 8;
 
 			let x = ((p == 0) || (p == 6) || (p == 7)) ? 0 : ((p == 2) || (p == 3) || (p == 4)) ? 2 : 1;
 			let y = ((p == 0) || (p == 1) || (p == 2)) ? 0 : ((p == 4) || (p == 5) || (p == 6)) ? 2 : 1;
@@ -141,7 +182,7 @@
 				basePos + (y * outer) + padding,
 				inner,
 				inner,
-				colour
+				colourGreyAlpha(0, 255 - (i * 64))
 			);
 		}
 
