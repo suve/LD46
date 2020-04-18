@@ -1,0 +1,48 @@
+version: 2.1
+executors:
+  fedora:
+    docker:
+      - image: registry.fedoraproject.org/fedora
+    shell: /usr/bin/bash
+
+jobs:
+  deploy:
+    executor: fedora
+    steps:
+      - run:
+          name: Install dependencies
+          command: >
+            sudo dnf install --assumeyes --setopt=install_weak_deps=False
+            git make optipng python3-rcssmin python3-rjsmin
+            openssh-clients zip
+      - checkout
+      - run:
+          name: Build
+          command: >
+            make all && mv build/ LD46/
+      - run:
+          name: Create .zip
+          command: >
+            zip -9 LD46.zip -r LD46/
+      - run:
+          name: Recreate SSH configuration
+          command: >
+            mkdir -p ~/.ssh/
+            && echo "${CI_SSH_KEY}" | base64 --decode > ~/.ssh/deploy-key
+            && chmod 600 ~/.ssh/deploy-key
+            && echo "${CI_SSH_FINGERPRINT}" | base64 --decode >> ~/.ssh/known_hosts
+      - run:
+          name: Deploy to remote host
+          command: >
+            scp -r -oIdentityFile=~/.ssh/deploy-key
+            LD46/ LD46.zip
+            "${CI_SSH_USER}@${CI_SSH_HOST}:domains/svgames.pl/public_html/ludumdare/"
+
+workflows:
+  deploy:
+    jobs:
+      - deploy:
+          filters:
+            branches:
+              only:
+                - trunk
